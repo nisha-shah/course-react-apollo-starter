@@ -9,6 +9,7 @@ export const REST_SERVER_URL = `http://localhost:${REST_PORT}`;
 
 const context = {
     restUrl: REST_SERVER_URL,
+    isLoggedIn: false,
 };
 
 const server = new ApolloServer({

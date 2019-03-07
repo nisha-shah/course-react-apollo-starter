@@ -1,8 +1,34 @@
 {
-  "items": [
+  "tasks": [
+    {
+      "id": "g7ejsxwa1pm",
+      "name": "completed task",
+      "category": 2,
+      "status": "COMPLETED",
+      "createdDate": "2019-03-07T01:30:23.529Z"
+    },
+    {
+      "name": "Incomplete Task",
+      "id": "g7ejsxwa3mr",
+      "status": "INCOMPLETE",
+      "createdDate": "2019-03-07T00:30:23.529Z"
+    }
+  ],
+  "categories": [
     {
       "id": 1,
-      "name": "some item"
+      "color": "blue",
+      "name": "Work"
+    },
+    {
+      "id": 2,
+      "color": "green",
+      "name": "Home"
+    },
+    {
+      "id": 3,
+      "color": "red",
+      "name": "Family"
     }
   ]
 }
