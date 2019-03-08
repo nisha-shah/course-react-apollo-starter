@@ -6,6 +6,7 @@ import { WebSocketLink } from "apollo-link-ws"
 import { getMainDefinition } from "apollo-utilities"
 import { onError } from "apollo-link-error"
 import gql from "graphql-tag"
+import { RestLink } from "apollo-link-rest"
 
 const GRAPHQL_PORT = process.env.REACT_APP_GRAPHQL_PORT || 3010
 
@@ -31,13 +32,17 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]: ${networkError}`)
 })
 
+const restLink = new RestLink({
+  uri: "https://swapi.co/api/",
+})
+
 const link = split(
   ({ query }) => {
     const { kind, operation } = getMainDefinition(query)
     return kind === "OperationDefinition" && operation === "subscription"
   },
   webSocketLink,
-  ApolloLink.from([errorLink, httpLink])
+  ApolloLink.from([restLink, errorLink, httpLink])
 )
 
 export const client = new ApolloClient({
@@ -46,13 +51,15 @@ export const client = new ApolloClient({
   connectToDevTools: true,
   resolvers: {
     Mutation: {
-      setTaskFilters: (_, { id, status }, { cache }) => {
+      setTaskFilters: (_, { order, sort, id, status }, { cache }) => {
         const data = cache.readQuery({
           query: gql`
             {
               taskFilters @client {
                 category
                 status
+                order
+                sort
               }
             }
           `,
@@ -68,6 +75,13 @@ export const client = new ApolloClient({
         if (status) {
           newFilters.status = status
         }
+        if (order) {
+          newFilters.order = order
+        }
+        if (sort) {
+          newFilters.sort = sort
+        }
+
         const nextFilters = { ...taskFiters, ...newFilters }
 
         cache.writeData({ data: { taskFilters: nextFilters } })
@@ -82,6 +96,8 @@ cache.writeData({
     taskFilters: {
       status: `ALL`,
       category: null,
+      order: `desc`,
+      sort: `createdDate`,
       __typename: "TaskFilters",
     },
   },

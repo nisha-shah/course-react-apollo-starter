@@ -7,6 +7,8 @@ export const GET_TASK_FILTERS_QUERY = gql`
     taskFilters @client {
       category
       status
+      order
+      sort
     }
   }
 `

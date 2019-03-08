@@ -4,7 +4,21 @@ type Query {
     category(id: ID!): Category
     categories: [Category]
     task(id:ID!): Task
-    tasks(filters: TaskFilterInput ): [Task]
+    tasks(page: Int limit: Int filters: TaskFilterInput ): [Task]
+    paginatedTasks( page: Int limit: Int filters: TaskFilterInput): PaginatedTasks
+}
+
+enum ConnectionOrder {
+  asc
+  desc
+}
+
+type PaginatedTasks {
+  page: Int
+  limit: Int
+  total: Int
+  nextPage: Int
+  tasks: [Task]
 }
 
 type Mutation {
@@ -43,9 +57,17 @@ input CreateTaskInput {
   category: ID
 }
 
+enum TaskSortEnum {
+  createdDate
+  name
+  status
+}
+
 input TaskFilterInput {
     status: TaskStatusEnum
     category: ID
+    order: ConnectionOrder
+    sort: TaskSortEnum
 }
 
 enum TaskStatusEnum {
@@ -59,6 +81,7 @@ type Task {
   name: String
   category: Category
   status: TaskStatusEnum
+  createdDate: String
 }
 
 type Category {

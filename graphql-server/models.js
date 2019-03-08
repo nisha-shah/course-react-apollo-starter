@@ -10,8 +10,19 @@ const uniqid = require("uniqid")
  * @returns {string}
  */
 const buildTasksQueryString = filters => {
-    filters._sort = `createdDate`
-    filters._order = `desc`
+
+    filters._sort = `createdDate`;
+    filters._order =`desc`;
+
+    if ( filters.sort ) {
+        filters._sort = filters.sort ? filters.sort : `createdDate`
+        delete(filters.sort);
+    }
+
+    if ( filters.order ) {
+        filters._order = filters.order ? filters.order : `desc`
+        delete(filters.order);
+    }
 
     // delete the status filter if it's in the query before fetching
     if (filters && filters.status === `ALL`) {
@@ -32,6 +43,8 @@ const buildTasksQueryString = filters => {
         filters._limit = filters.limit;
         delete(filters.limit);
     }
+
+    console.log(filters);
 
     const searchParams = new URLSearchParams(filters)
     return searchParams.toString()

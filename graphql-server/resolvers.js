@@ -20,36 +20,58 @@ export const resolvers = {
         task: async (root, { id }) => {
             return await TasksModel.getTaskById( id );
         },
-        tasks: async (root, { filters = {} }) => {
+        tasks: async (root, { page, limit, filters = {} }) => {
+            if ( page ) {
+                filters.page = page;
+            }
+
+            if ( limit ) {
+                filters.limit = limit;
+            }
             const res = await TasksModel.getTasks(filters);
+            console.log(res);
             return res.tasks;
-        }
+        },
+        paginatedTasks: async (root, { page, limit, filters = {} }) => {
+
+            if ( page ) {
+                filters.page = page;
+            }
+
+            if ( limit ) {
+                filters.limit = limit;
+            }
+
+            return await TasksModel.getTasks(filters);
+        },
     },
     Mutation: {
         createTask: async (root, { input }) => {
             return await TasksModel.createTask(input).then(task => {
                 pubsub.publish(TASK_CREATED, { taskCreated: task })
+                console.log(task);
                 return {
                     task,
                 }
             })
         },
-        updateTask: async ( root, { id, input } ) => {
-            const updatedTask = await TasksModel.updateTask(id, input);
-            pubsub.publish( TASK_UPDATED, { taskUpdated: updatedTask });
-            return {
-                task: updatedTask
-            }
-        },
         deleteTask: async (root, { id }) => {
-            const task = await TasksModel.getTaskById(id);
-            const deletedId = await TasksModel.deleteTask(id);
-            pubsub.publish( TASK_UPDATED, { task, deletedId });
-            return {
-                task,
-                deletedId
-            }
-        }
+            return await TasksModel.getTaskById(id).then(task => {
+                TasksModel.deleteTask(id);
+                return task;
+            }).then(task => {
+                pubsub.publish(TASK_DELETED, { taskDeleted: task })
+                return task;
+            });
+        },
+        updateTask: async (root, { id, input }) => {
+            return await TasksModel.updateTask(id, input).then(task => {
+                console.log(task);
+                pubsub.publish(TASK_UPDATED, { taskUpdated: task })
+                return task
+            })
+
+        },
     },
     Task: {
         category: async ({ category }) => {

@@ -70,6 +70,8 @@ const TaskList = ({ filters }) => {
               if (!subscriptionData.data) return prev
               const { taskCreated } = subscriptionData.data
               if (taskCreated) {
+                console.log(taskCreated)
+
                 return {
                   ...prev,
                   tasks: [taskCreated, ...prev.tasks],
@@ -77,6 +79,33 @@ const TaskList = ({ filters }) => {
               }
               return prev
             },
+          })
+          unsubscribe = subscribeToMore({
+            document: TASK_DELETED_SUBSCRIPTION,
+            updateQuery: (prev, { subscriptionData }) => {
+              if (!subscriptionData.data) return prev
+              const { taskDeleted } = subscriptionData.data
+
+              console.log(taskDeleted)
+
+              if (taskDeleted) {
+                const index = prev.tasks.findIndex(
+                  obj => obj.id === taskDeleted.id
+                )
+                const newTasks = [
+                  ...prev.tasks.slice(0, index),
+                  ...prev.tasks.slice(index + 1),
+                ]
+                return {
+                  ...prev,
+                  tasks: newTasks,
+                }
+              }
+              return prev
+            },
+          })
+          unsubscribe = subscribeToMore({
+            document: TASK_UPDATED_SUBCRIPTION,
           })
         }
 
@@ -111,6 +140,27 @@ const TaskList = ({ filters }) => {
                 </Box>
               </Box>
             </Box>
+            <Query
+              query={gql`
+                query luke {
+                  person @rest(type: "Person", path: "people/1/") {
+                    name
+                  }
+                  species @rest(type: "Species", path: "species/1/") {
+                    name
+                  }
+                }
+              `}
+            >
+              {({ data, loading, errors }) => {
+                if (loading || errors) return null
+                return (
+                  <div>
+                    {data.person.name} {data.species.name}
+                  </div>
+                )
+              }}
+            </Query>
           </Fragment>
         )
       }}
