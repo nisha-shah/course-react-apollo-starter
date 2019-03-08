@@ -4,9 +4,8 @@ import { ApolloClient } from "apollo-client"
 import { split, ApolloLink } from "apollo-link"
 import { WebSocketLink } from "apollo-link-ws"
 import { getMainDefinition } from "apollo-utilities"
-import { GET_TASK_FILTERS_QUERY } from "../components/TaskList"
-import { onError } from "apollo-link-error";
-import gql from 'graphql-tag'
+import { onError } from "apollo-link-error"
+import gql from "graphql-tag"
 
 const GRAPHQL_PORT = process.env.REACT_APP_GRAPHQL_PORT || 3010
 
@@ -23,14 +22,14 @@ const webSocketLink = new WebSocketLink({
 })
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
-    if (graphQLErrors)
-        graphQLErrors.map(({ message, locations, path }) =>
-            console.log(
-                `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-            )
-        );
-    if (networkError) console.log(`[Network error]: ${networkError}`);
-});
+  if (graphQLErrors)
+    graphQLErrors.map(({ message, locations, path }) =>
+      console.log(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      )
+    )
+  if (networkError) console.log(`[Network error]: ${networkError}`)
+})
 
 const link = split(
   ({ query }) => {
@@ -48,7 +47,16 @@ export const client = new ApolloClient({
   resolvers: {
     Mutation: {
       setTaskFilters: (_, { id, status }, { cache }) => {
-        const data = cache.readQuery({ query: gql`{taskFilters @client { category, status } }` })
+        const data = cache.readQuery({
+          query: gql`
+            {
+              taskFilters @client {
+                category
+                status
+              }
+            }
+          `,
+        })
 
         const { taskFiters } = data
         const newFilters = {

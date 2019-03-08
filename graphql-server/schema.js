@@ -13,6 +13,12 @@ type Mutation {
   deleteTask(id: ID!): DeleteTaskPayload
 }
 
+type Subscription {
+  taskCreated: Task
+  taskDeleted: Task
+  taskUpdated: Task
+}
+
 input UpdateTaskInput {
   name: String
   category: ID

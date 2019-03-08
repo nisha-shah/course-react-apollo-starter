@@ -28,7 +28,7 @@ const CategorySelect = props => {
     <Query query={GET_CATEGORIES_QUERY}>
       {({ data, loading, errors }) => {
         if (errors) {
-            return null
+          return null
         }
         const { categories } = data
         return (

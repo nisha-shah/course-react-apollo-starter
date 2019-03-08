@@ -3,7 +3,7 @@ import { Row, Col, Radio } from "antd"
 import CategorySelect from "../CategorySelect"
 import { Mutation } from "react-apollo"
 import gql from "graphql-tag"
-import {withTaskFilters} from "../WithTaskFilters";
+import { withTaskFilters } from "../WithTaskFilters"
 
 const RadioButton = Radio.Button
 const RadioGroup = Radio.Group
@@ -17,7 +17,7 @@ const SET_TASK_FILTERS_MUTATION = gql`
   }
 `
 
-const TaskFilters = ({filters}) => {
+const TaskFilters = ({ filters }) => {
   return (
     <Mutation mutation={SET_TASK_FILTERS_MUTATION}>
       {setTaskFilters => {
@@ -26,7 +26,7 @@ const TaskFilters = ({filters}) => {
             <h2>Filter Tasks:</h2>
             <Col xs={12}>
               <CategorySelect
-                  value={filters.category ? filters.category : null}
+                value={filters.category ? filters.category : null}
                 handleOnChange={value => {
                   setTaskFilters({ variables: { id: value ? value : null } })
                 }}

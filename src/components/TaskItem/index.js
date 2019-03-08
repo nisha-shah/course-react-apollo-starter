@@ -1,6 +1,6 @@
 import React from "react"
 import gql from "graphql-tag"
-import { Row, Col, Tag, Button } from "antd"
+import { Row, Col, Tag } from "antd"
 import DeleteTaskButton from "../DeleteTaskButton"
 import TaskStatusButtons from "../TaskStatusButtons"
 

@@ -1,8 +1,9 @@
 import React from "react"
-import { Query, Mutation } from "react-apollo"
+import { Mutation } from "react-apollo"
 import gql from "graphql-tag"
 import { Button } from "antd"
-import { GET_TASK_FILTERS_QUERY, GET_TASKS_QUERY } from "../TaskList"
+import { GET_TASKS_QUERY } from "../TaskList"
+import { withTaskFilters } from "../WithTaskFilters"
 
 const DELETE_TASK_MUTATION = gql`
   mutation deleteTask($id: ID!) {
@@ -12,61 +13,51 @@ const DELETE_TASK_MUTATION = gql`
   }
 `
 
-const DeleteTaskButton = ({ id }) => (
-  <Query query={GET_TASK_FILTERS_QUERY}>
-    {({ data, loading, errors }) => {
-      if (errors || loading) {
-          return null
+const DeleteTaskButton = ({ filters, id }) => (
+  <Mutation
+    mutation={DELETE_TASK_MUTATION}
+    update={(
+      cache,
+      {
+        data: {
+          deleteTask: { deletedId },
+        },
       }
-      const { taskFilters } = data
+    ) => {
+      const { tasks } = cache.readQuery({
+        query: GET_TASKS_QUERY,
+        variables: { filters },
+      })
+
+      const index = tasks.find(obj => obj.id === deletedId)
+
+      let newTasks = [...tasks]
+      newTasks.splice(index, 1)
+
+      cache.writeQuery({
+        query: GET_TASKS_QUERY,
+        variables: { filters },
+        data: {
+          tasks: newTasks,
+        },
+      })
+    }}
+  >
+    {deleteTask => {
       return (
-        <Mutation
-          mutation={DELETE_TASK_MUTATION}
-          update={(
-            cache,
-            {
-              data: {
-                deleteTask: { deletedId },
-              },
-            }
-          ) => {
-            const { tasks } = cache.readQuery({
-              query: GET_TASKS_QUERY,
-              variables: { filters: taskFilters },
-            })
-
-            const index = tasks.find(obj => obj.id === deletedId)
-
-            let newTasks = [...tasks]
-            newTasks.splice(index, 1)
-
-            cache.writeQuery({
-              query: GET_TASKS_QUERY,
-              variables: { filters: taskFilters },
-              data: {
-                tasks: newTasks,
-              },
-            })
+        <Button
+          style={{ marginLeft: `15px` }}
+          icon="delete"
+          type="danger"
+          onClick={() => {
+            deleteTask({ variables: { id } })
           }}
         >
-          {deleteTask => {
-            return (
-              <Button
-                style={{ marginLeft: `15px` }}
-                icon="delete"
-                type="danger"
-                onClick={() => {
-                  deleteTask({ variables: { id } })
-                }}
-              >
-                Delete
-              </Button>
-            )
-          }}
-        </Mutation>
+          Delete
+        </Button>
       )
     }}
-  </Query>
+  </Mutation>
 )
 
-export default DeleteTaskButton
+export default withTaskFilters(DeleteTaskButton)

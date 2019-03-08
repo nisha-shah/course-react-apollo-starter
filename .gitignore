@@ -24,4 +24,3 @@ yarn-error.log*
 /graphql-server-dist
 prep
 ~
-src/**/*.css

@@ -1,10 +1,10 @@
-// import { PubSub } from "graphql-subscriptions"
+import { PubSub } from "graphql-subscriptions"
 import { CategoryModel, TasksModel } from "./models"
 
-// const pubsub = new PubSub()
-// const TASK_CREATED = "taskCreated"
-// const TASK_DELETED = "taskDeleted"
-// const TASK_UPDATED = "taskUpdated"
+const pubsub = new PubSub()
+const TASK_CREATED = "taskCreated"
+const TASK_DELETED = "taskDeleted"
+const TASK_UPDATED = "taskUpdated"
 
 export const resolvers = {
     Query:  {
@@ -27,20 +27,24 @@ export const resolvers = {
     },
     Mutation: {
         createTask: async (root, { input }) => {
-            const newTask = await TasksModel.createTask(input);
-            return {
-                task: newTask
-            }
+            return await TasksModel.createTask(input).then(task => {
+                pubsub.publish(TASK_CREATED, { taskCreated: task })
+                return {
+                    task,
+                }
+            })
         },
         updateTask: async ( root, { id, input } ) => {
-            const UpdatedTask = await TasksModel.updateTask(id, input);
+            const updatedTask = await TasksModel.updateTask(id, input);
+            pubsub.publish( TASK_UPDATED, { taskUpdated: updatedTask });
             return {
-                task: UpdatedTask
+                task: updatedTask
             }
         },
         deleteTask: async (root, { id }) => {
             const task = await TasksModel.getTaskById(id);
             const deletedId = await TasksModel.deleteTask(id);
+            pubsub.publish( TASK_UPDATED, { task, deletedId });
             return {
                 task,
                 deletedId
@@ -50,6 +54,17 @@ export const resolvers = {
     Task: {
         category: async ({ category }) => {
             return await CategoryModel.getCategoryById( category );
+        }
+    },
+    Subscription: {
+        taskCreated: {
+            subscribe: () => pubsub.asyncIterator(TASK_CREATED)
+        },
+        taskDeleted: {
+            subscribe: () => pubsub.asyncIterator(TASK_UPDATED)
+        },
+        taskUpdated: {
+            subscribe: () => pubsub.asyncIterator(TASK_DELETED)
         }
     }
 };
