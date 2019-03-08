@@ -1,17 +1,11 @@
 {
   "tasks": [
     {
-      "id": "g7ejsxwa1pm",
-      "name": "completed task",
-      "category": 2,
+      "name": "Task 2",
+      "category": "1",
+      "id": "j5ljszaf19j",
       "status": "COMPLETED",
-      "createdDate": "2019-03-07T01:30:23.529Z"
-    },
-    {
-      "name": "Incomplete Task",
-      "id": "g7ejsxwa3mr",
-      "status": "INCOMPLETE",
-      "createdDate": "2019-03-07T00:30:23.529Z"
+      "createdDate": "2019-03-07T23:53:57.031Z"
     }
   ],
   "categories": [

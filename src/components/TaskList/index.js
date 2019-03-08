@@ -5,7 +5,7 @@ import { List } from "antd"
 import TaskItem from "../TaskItem"
 import { TaskItemFragment } from "../TaskItem"
 
-const GET_TASKS_QUERY = gql`
+export const GET_TASKS_QUERY = gql`
   query GET_TASKS($filters: TaskFilterInput) {
     tasks(filters: $filters) {
       ...TaskItem
@@ -14,41 +14,66 @@ const GET_TASKS_QUERY = gql`
   ${TaskItemFragment}
 `
 
-const TaskList = ({filters}) => {
-    console.log( filters );
+export const GET_TASK_FILTERS_QUERY = gql`
+  query GET_TASK_FILTERS {
+    taskFilters @client {
+      category
+      status
+    }
+  }
+`
+
+const TaskList = () => {
   return (
-    <Query
-      query={GET_TASKS_QUERY}
-      variables={{filters}}
-    >
+    <Query query={GET_TASK_FILTERS_QUERY}>
       {({ data, loading, errors }) => {
         if (errors) {
           console.log(errors)
           return `Errors! ${errors}`
         }
         if (loading) {
-          return null;
+          return null
         }
-        if (!data) {
-            return null;
-        }
-        const { tasks } = data;
-        return tasks ? (
-          <List
-            style={{
-              background: `white`,
+        const { taskFilters } = data
+        delete taskFilters.__typename
+
+        return (
+          <Query
+            query={GET_TASKS_QUERY}
+            variables={{
+              filters: taskFilters
+                ? taskFilters
+                : { category: null, status: `ALL` },
             }}
-            loading={loading}
-            dataSource={tasks}
-            renderItem={task => {
+          >
+            {({ data, loading, errors }) => {
+              if (errors) {
+                console.log(errors)
+                return `Errors! ${errors}`
+              }
+              if (loading) {
+                return null
+              }
+              const { tasks } = data
               return (
-                <List.Item>
-                  <TaskItem task={task} />
-                </List.Item>
+                <List
+                  style={{
+                    background: `white`,
+                  }}
+                  loading={loading}
+                  dataSource={tasks}
+                  renderItem={task => {
+                    return (
+                      <List.Item>
+                        <TaskItem task={task} />
+                      </List.Item>
+                    )
+                  }}
+                />
               )
             }}
-          />
-        ) : null;
+          </Query>
+        )
       }}
     </Query>
   )
